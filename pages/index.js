@@ -1,9 +1,29 @@
+import { useEffect, useState } from "react";
 import { BsSpotify } from "react-icons/bs";
 import { useSession, signIn, signOut } from "next-auth/react";
+import useSWR from "swr";
+import { getUserData } from "@/lib/spotty";
 
 export default function Login() {
   const { data: session } = useSession();
-  console.log(session);
+  const [playlists, setPlaylists] = useState(null);
+  const [tracks, setTracks] = useState(null);
+  const [artists, setArtists] = useState(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      let res = await getUserData(session.token.accessToken);
+      let [playlistData, topTracksData, topArtistsData] = res;
+      setPlaylists(playlistData);
+      setTracks(topTracksData);
+      setArtists(topArtistsData);
+    };
+    if (session) {
+      fetchData();
+    }
+  }, [session]);
+
+  console.log({ playlists, tracks, artists });
 
   if (session) {
     return (
